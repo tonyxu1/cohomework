@@ -1,3 +1,4 @@
+## Use case and requirement
 In finance, it's common for accounts to have so-called "velocity limits". In this task, you'll write a program that accepts or declines attempts to load funds into customers' accounts in real-time.
 
 Each attempt to load funds will come as a single-line JSON payload, structured as follows:
@@ -32,3 +33,34 @@ Your program should process lines from `input.txt` and return output in the form
 You're welcome to write your program in a general-purpose language of your choosing, but as we use Go on the back-end and TypeScript on the front-end, we do have a preference towards solutions written in Go (back-end) and TypeScript (front-end).
 
 We value well-structured, self-documenting code with sensible test coverage. Descriptive function and variable names are appreciated, as is isolating your business logic from the rest of your code.
+## Solution
+### Configuration
+- All configuration is in `config.json` file
+- Daily max load amount
+- Daily max load count
+- Weekly max load amount
+- Output file name  
+```
+  if output file name is empty string (""), output will be directed to console 
+```
+### Assumption
+1. Entries in `input.txt` are in ascending order by load_time
+2. All entry in `input.txt` are valid,  and load amount is always with `$` before the decimal number.
+3. Rejected `load_id` is still count for duplication:
+```
+  load_id: "6928" and customer_id: "562"
+  Note: my first attempt failed due to misunderstanding of load id is always captured regardless rejected or accepted.
+``` 
+3. User who runs the application have sufficient privilege to write output file
+
+### Unit test
+1. All functions passed unit test
+2. Purposely ignored func main() unit testing 
+
+### Cost
+1. 10 hours in total coding: 8 hours development and 2 hours unit testing
+2. 5 Cups coffee 
+3. A box of orange
+
+
+<center> <h1>Thank you</h1> </center>

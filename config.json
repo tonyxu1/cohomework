@@ -1,5 +1,6 @@
 {
     "dailymaxamount": 5000,
     "dailymaxcount":3,
-    "weeklymaxamount": 20000
+    "weeklymaxamount": 20000,
+    "outputfile":"tony_output2.txt"
 }

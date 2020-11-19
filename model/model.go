@@ -9,7 +9,7 @@ import (
 type AccountEntry struct {
 	ID         string    `json:"id"`
 	CustomerID string    `json:"customer_id"`
-	LoadAmount float32   `json:"load_amount"`
+	LoadAmount float32   `json:"load_amount,string"`
 	LoadTime   time.Time `json:"time"`
 }
 
@@ -22,7 +22,7 @@ type OutputEntry struct {
 
 // WeeklyTransactionEntry : Holds total load amount of each weekday and transaction count of the customer and transaction id.
 type WeeklyTransactionEntry struct {
-	ID          string
+	ID          map[string]struct{}
 	Transaction map[time.Weekday]DailyTotal
 }
 
@@ -35,15 +35,10 @@ type DailyTotal struct {
 // TransactionList : Transaction information for all input customers
 type TransactionList map[string]WeeklyTransactionEntry
 
-// Init : Function to initalize the TransactionList
-func (tl TransactionList) Init() {
-	tl = make(map[string]WeeklyTransactionEntry)
-}
-
 // IsDupTransaction : Function to check if a load ID is observed more than once for a particular user, all but the first instance can be ignored
 func (tl TransactionList) IsDupTransaction(transactionID, customerID string) bool {
 	if v, ok := tl[customerID]; ok {
-		if v.ID == transactionID {
+		if _, ok := v.ID[transactionID]; ok {
 			return true
 		}
 	}
@@ -54,7 +49,7 @@ func (tl TransactionList) IsDupTransaction(transactionID, customerID string) boo
 - A maximum of $20,000 can be loaded per week
 - A maximum of 3 loads can be performed per day, regardless of amount
 */
-func (tl TransactionList) canAccept(customerID string, dailyAmount, weeklyAmunt float32, dailyCount int8) bool {
+func (tl TransactionList) canAccept(customerID string, dailyAmount, weeklyAmount float32, dailyCount int8) bool {
 	if v, ok := tl[customerID]; ok {
 		t := v.Transaction
 		var weeklyAmoutTotal float32 = 0.0
@@ -67,7 +62,7 @@ func (tl TransactionList) canAccept(customerID string, dailyAmount, weeklyAmunt 
 			}
 			weeklyAmoutTotal = weeklyAmoutTotal + dt.Amount
 		}
-		if weeklyAmoutTotal > weeklyAmunt {
+		if weeklyAmoutTotal > weeklyAmount {
 			return false
 		}
 
@@ -79,16 +74,42 @@ func (tl TransactionList) canAccept(customerID string, dailyAmount, weeklyAmunt 
 //Update : Function to update the Transaction List map
 func (tl TransactionList) Update(ae AccountEntry) {
 
-	if tl.IsDupTransaction(ae.ID, ae.CustomerID) {
-		return
-	}
-	v, _ := tl[ae.CustomerID]
+	v, ok := tl[ae.CustomerID]
 	newAmt := v.Transaction[ae.LoadTime.Weekday()].Amount + ae.LoadAmount
 	newCount := v.Transaction[ae.LoadTime.Weekday()].Count + 1
 
-	v.Transaction[ae.LoadTime.Weekday()] = DailyTotal{
-		Amount: newAmt,
-		Count:  newCount,
+	if ok {
+		v.ID[ae.ID] = struct{}{}
+		v.Transaction[ae.LoadTime.Weekday()] = DailyTotal{
+			Amount: newAmt,
+			Count:  newCount,
+		}
+	} else {
+		t := make(map[time.Weekday]DailyTotal)
+		idmap := make(map[string]struct{})
+		dt := DailyTotal{
+			Amount: newAmt,
+			Count:  newCount,
+		}
+		idmap[ae.ID] = struct{}{}
+		t[ae.LoadTime.Weekday()] = dt
+		tl[ae.CustomerID] = WeeklyTransactionEntry{
+			ID:          idmap,
+			Transaction: t,
+		}
+	}
+}
+
+// a little bit more calculataion, but cleaner code and approach
+func (tl TransactionList) adjustAmount(ae AccountEntry, dailyAmt, weeklyAmt float32, dailyCount int8) {
+	if !tl.canAccept(ae.CustomerID, dailyAmt, weeklyAmt, dailyCount) {
+		// if load is rejected, Should the load ID need to be removed ?
+		// delete(tl[ae.CustomerID].ID, ae.ID)
+		t := DailyTotal{
+			Amount: tl[ae.CustomerID].Transaction[ae.LoadTime.Weekday()].Amount - ae.LoadAmount,
+			Count:  tl[ae.CustomerID].Transaction[ae.LoadTime.Weekday()].Count - 1,
+		}
+		tl[ae.CustomerID].Transaction[ae.LoadTime.Weekday()] = t
 	}
 }
 
@@ -100,6 +121,17 @@ func (tl TransactionList) CreateOutput(ae AccountEntry, dailyAmount, weeklyAmoun
 		Accepted:   tl.canAccept(ae.CustomerID, dailyAmount, weeklyAmount, dailyCount),
 	}
 
+	tl.adjustAmount(ae, dailyAmount, weeklyAmount, dailyCount)
 	result, _ := json.Marshal(oe)
 	return string(result)
+}
+
+// Reset : Reset amount and count in the list, for all customers.
+func (tl TransactionList) Reset() {
+	for _, v := range tl {
+		for k := range v.Transaction {
+			delete(v.Transaction, k)
+		}
+
+	}
 }
