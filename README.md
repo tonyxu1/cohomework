@@ -1,7 +1,7 @@
 ## Use case and requirement
 In finance, it's common for accounts to have so-called "velocity limits". In this task, you'll write a program that accepts or declines attempts to load funds into customers' accounts in real-time.
 
-Each attempt to load funds will come as a single-line JSON payload, structured as follows:
+Each attempt to load funds will come as a single-line JSON payload, structured as follow:
 
 ```json
 {
@@ -58,9 +58,7 @@ We value well-structured, self-documenting code with sensible test coverage. Des
 2. Purposely ignored func main() unit testing 
 
 ### Cost
-1. 10 hours in total coding: 8 hours development and 2 hours unit testing
-2. 5 Cups coffee 
+1. 5 hours in total coding: 4 hours development and 1 hour unit testing
+2. 2 Cups coffee 
 3. A box of orange
 
-
-<center> <h1>Thank you</h1> </center>

@@ -20,6 +20,7 @@ var (
 	transactionEntry model.AccountEntry
 )
 
+// Process is the main function of processor, it will read the input file and process the entries
 func Process() {
 	if err := conf.GetValue(); err != nil {
 		log.Fatalln(err)
@@ -41,8 +42,6 @@ func Process() {
 		log.Fatalln(err)
 	}
 	defer inputFile.Close()
-
-	// transactionList = make(map[string]model.WeeklyTransactionEntry)
 
 	//Read the first line from input file to get the start date
 	// Assumption : input.txt contains more than 1 line of data.
@@ -81,6 +80,7 @@ func Process() {
 
 }
 
+// writeOutput will write the output to console if output file name is empty or file
 func writeOutput(writeToFile bool, f *os.File, text string) {
 	if writeToFile {
 		fmt.Fprintln(f, text)
@@ -97,7 +97,7 @@ func processEntry(entry model.AccountEntry, writeToFile bool, OutputFile *os.Fil
 
 }
 
-//
+// foundMonday will return true if the load date is on Monday
 func foundMonday(startTime, endTime time.Time) bool {
 	if !startTime.Before(endTime) {
 		return false
