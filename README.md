@@ -49,9 +49,8 @@ We value well-structured, self-documenting code with sensible test coverage. Des
 3. Rejected `load_id` is still count for duplication:
 ```
   load_id: "6928" and customer_id: "562"
-  Note: my first attempt failed due to misunderstanding of load id is always captured regardless rejected or accepted.
 ``` 
-3. User who runs the application have sufficient privilege to write output file
+4. User who runs the application have sufficient privilege to write output file
 
 ### Unit test
 1. All functions passed unit test
