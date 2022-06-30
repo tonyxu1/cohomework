@@ -1,3 +1,3 @@
-module github.com/tonyxu1/kohomework
+module github.com/tonyxu1/cohomework
 
 go 1.18

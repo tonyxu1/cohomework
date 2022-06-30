@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tonyxu1/kohomework/model"
+	"github.com/tonyxu1/cohomework/model"
 )
 
 var (

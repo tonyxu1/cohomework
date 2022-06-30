@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/tonyxu1/kohomework/model"
+	"github.com/tonyxu1/cohomework/model"
 )
 
 // Variable for testing
